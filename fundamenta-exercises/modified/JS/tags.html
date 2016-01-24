@@ -3,7 +3,19 @@
 	<body>
 		<script type='text/javascript'>
 			// make functionality goes here
+            var tags = ["h1", "a"];
 			make = {};
+            
+            tags.forEach(function(tag) {
+                make[tag] = function() {
+                        return document.createElement(tag);
+                    }
+            });
+            
+            
+
+            
+
 		</script>
 		<script type='text/javascript'>
 			var h1 = make.h1();
@@ -11,7 +23,7 @@
 			h1.innerHTML = "Hello World"
 			document.body.appendChild(h1);
 
-			var a = make.a()
+			var a = make.a();
 
 			a.href= "http://canjs.com"
 			a.innerHTML = "CanJS"

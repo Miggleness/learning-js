@@ -31,3 +31,11 @@
 		</script>
 	</body>
 </html>
+
+for(var i=0; i<tags.length;i++) {
+                (function(tag) {
+                    make[tag] = function() {
+                        return document.createElement(tag);
+                    }
+               })(tags[i]);
+            }
