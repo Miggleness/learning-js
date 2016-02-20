@@ -19,6 +19,26 @@
         }
         return target;
     };
+    
+    var makeTraverser = function(cb){
+        return function() {
+            var elements = [],
+                args = arguments;
+                
+            $.each(this, function (i, el)    {
+                 var ret = cb.apply(el, args);
+                 
+                 if(ret && isArrayLike(ret)){
+                     [].push.apply(elements, ret);
+                 }
+                 else if (ret) {
+                     elements.push(ret);
+                 }
+            });
+            
+            return $(elements);
+        }
+    };
 
     var getText = function (el) {
         var txt = '';
@@ -137,51 +157,75 @@
 
             return $(accumulator);
         },
-        next: function () {
-            var accumulator = [];
-
-            $.each(this, function (i, el) {
-                var current = el.nextSibling;
+        next: makeTraverser(function(){
+            var current = this.nextSibling;
 
                 while (current && current.nodeType != Node.ELEMENT_NODE) {
                     current = current.nextSibling;
                 }
 
-                if (current) {
-                    accumulator.push(current);
+           if(current){
+               return current;
+           }
+        }), 
+        prev: makeTraverser(function(){
+            var current = this.previousSibling;
+
+                while (current && current.nodeType !== Node.ELEMENT_NODE) {
+                    current = current.previousSibling;
                 }
 
-            });
+           if(current){
+               return current;
+           }
+        }), 
+        // parent: function () {
+        //     var accumulator = [];
+        //     $.each(this, function (i, el) {
+        //        var r = el.parentNode;
+        //        if(r){
+        //           [].push.call(accumulator, r) 
+        //        }
 
-            return $(accumulator);
+        //         //[].push.apply(accumulator, r)
+        //         //accumulator.push(r);
+        //     });
 
+        //     return $(accumulator); 
+        // },
+        parent: makeTraverser(function() {
+            return this.parentNode;
+        }),
+        children: makeTraverser(function() {
+            return this.childNodes;
+        }),
+        attr: function (attrName, value) { 
+            if(arguments.length > 1) {
+                $.each(this, function (i, el) {
+                    el.setAttribute(attrName, value);
+                });
+
+                return this;
+            }
+            else{
+                return this[0] && this[0].getAttribute(attrName); 
+            }
         },
-        prev: function () { },
-        parent: function () {
-            var accumulator = [];
-            $.each(this, function (i, el) {
-               var r = el.parentNode;
+        css: function (cssPropName, value) { 
+            if(arguments.length > 1) {
+                $.each(this, function (i, el) {
+                    el.style[cssPropName] =  value;
+                });
 
-                [].push.apply(accumulator, r)
-            });
-
-            return $(accumulator); 
-            
+                return this;
+            }
+            else{
+                return this[0] 
+                && document.defaultView
+                            .getComputedStyle(this[0])
+                            .getPropertyValue(cssPropName); 
+            }
         },
-        children: function () {
-            var accumulator = [];
-
-            $.each(this, function (i, el) {
-                var r = el.childNodes;
-
-                [].push.apply(accumulator, r)
-            });
-
-            return $(accumulator);
-
-        },
-        attr: function (attrName, value) { },
-        css: function (cssPropName, value) { },
         width: function () { },
         offset: function () {
             var offset = this[0].getBoundingClientRect();
