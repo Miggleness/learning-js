@@ -97,7 +97,8 @@
             return function () {
                 return fn.apply(context, arguments);
             };
-        }
+        },
+        fn: $.prototype
     });
 
     $.extend($.prototype, {
@@ -179,20 +180,6 @@
                return current;
            }
         }), 
-        // parent: function () {
-        //     var accumulator = [];
-        //     $.each(this, function (i, el) {
-        //        var r = el.parentNode;
-        //        if(r){
-        //           [].push.call(accumulator, r) 
-        //        }
-
-        //         //[].push.apply(accumulator, r)
-        //         //accumulator.push(r);
-        //     });
-
-        //     return $(accumulator); 
-        // },
         parent: makeTraverser(function() {
             return this.parentNode;
         }),
@@ -213,11 +200,9 @@
         },
         css: function (cssPropName, value) { 
             if(arguments.length > 1) {
-                $.each(this, function (i, el) {
+                return $.each(this, function (i, el) {
                     el.style[cssPropName] =  value;
                 });
-
-                return this;
             }
             else{
                 return this[0] 
@@ -226,7 +211,13 @@
                             .getPropertyValue(cssPropName); 
             }
         },
-        width: function () { },
+        width: function () { 
+            var width = this[0].clientWidth;
+            var leftPadding = this.css("padding-left"),
+                rightPadding = this.css("padding-right");
+                
+            return width - parseInt(leftPadding) - parseInt(rightPadding);
+        },
         offset: function () {
             var offset = this[0].getBoundingClientRect();
             return {
@@ -234,12 +225,24 @@
                 left: offset.left + window.pageXOffset
             };
         },
-        hide: function () { },
-        show: function () { },
+        hide: function () { 
+            this.css("display", 'none');
+        },
+        show: function () { 
+            this.css("display",'');
+        },
 
         // Events
-        bind: function (eventName, handler) { },
-        unbind: function (eventName, handler) { },
+        bind: function (eventName, handler) { 
+                $.each(this, function(i, el){
+                    el.addEventListener(eventName, handler, false);
+                });
+        },
+        unbind: function (eventName, handler) { 
+                $.each(this, function(i, el) {
+                    el.removeEventListener(eventName, handler, false);
+                });
+        },
         has: function (selector) {
             var elements = [];
 
@@ -268,8 +271,10 @@
         // Extra
         addClass: function (className) { },
         removeClass: function (className) { },
-        append: function (element) { }
+        append: function (element) { },
     });
 
     $.buildFragment = function (html) { };
+    
+    
 })();
