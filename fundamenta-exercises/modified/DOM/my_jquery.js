@@ -6,16 +6,20 @@
             return new $(selector);
         }
 
-        if (!(selector instanceof Array)) {
-            selector = document.querySelectorAll(selector);
+        var elements;
+        if (typeof selector === "string") {
+        elements = document.querySelectorAll(selector);
+        } else if ($.isArray(selector)) {
+        elements = selector;
         }
-
-        Array.prototype.push.apply(this, selector);
+        [].push.apply(this, elements);
     };
 
     $.extend = function (target, object) {
         for (var prop in object) {
+            if(object.hasOwnProperty(prop)){
             target[prop] = object[prop];
+            }
         }
         return target;
     };
@@ -147,17 +151,9 @@
                 return this[0] && getText.call(this[0], this[0]);
             }
         },
-        find: function (selector) {
-            var accumulator = [];
-
-            $.each(this, function (i, el) {
-                var r = el.querySelectorAll(selector);
-
-                [].push.apply(accumulator, r)
-            });
-
-            return $(accumulator);
-        },
+        find: makeTraverser(function(selector) {
+            return this.querySelectorAll(selector);
+        }),
         next: makeTraverser(function(){
             var current = this.nextSibling;
 

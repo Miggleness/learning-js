@@ -3,14 +3,17 @@ $.fn.tabs = function() {
   return $.each(this, function(i, element) {
     var active, tabContent = function(li) {
       return $(li.find("a").attr("href"));
-    }, activate = function(li) {
+    },
+    activate = function(li) {
       if (active) {
         active.removeClass("active");
         tabContent(active).hide();
       }
       active = li.addClass("active");
       tabContent(li).show();
-    }, $lis = $([ element ]).children();
+    },
+    $lis = $([ element ]).children();
+    
     activate($(element).find("li:first"));
     $.each($lis, function(i, li) {
       if (i === 0) {
